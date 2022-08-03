@@ -125,6 +125,13 @@ mod tests {
     }
 
     #[test]
+    fn parse_rest() {
+        let note = parse_note(120.0, "rE");
+        let expected_duration = Duration::from_millis(250);
+        assert_eq!(note.freq, None);
+        assert_eq!(note.duration, expected_duration);
+    }
+    #[test]
     fn test_parse_contents1() {
         let contents = "150\na2 c#3 e3";
         let notes = parse_file_contents(contents);
