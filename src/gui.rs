@@ -80,15 +80,16 @@ impl Gui {
     }
 
     pub fn run(&mut self, notes: &Vec<Note>) {
+        if self.running || notes.len() == 0 {
+            return;
+        }
+
         self.running = true;
         let mut cur_index = 0;
         let mut time_playing_cur_note = Duration::ZERO;
         let mut iteration_start;
         let mut previously_paused = false;
 
-        if notes.len() == 0 {
-            return;
-        }
         self.play_note(&notes[0]);
         'main_loop: loop {
             iteration_start = Instant::now();
