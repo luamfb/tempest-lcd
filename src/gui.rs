@@ -90,7 +90,13 @@ impl Gui {
         let mut iteration_start;
         let mut previously_paused = false;
 
+        // Special care must be taken to ensure first note is actually played.
+        // We must handle events before playing it as well, because there's
+        // a good chance we'll receive some event (like Shown or FocusGained)
+        // that would cause the screen to go blank.
+        self.handle_events();
         self.play_note(&notes[0]);
+
         'main_loop: loop {
             iteration_start = Instant::now();
             let cur_note = &notes[cur_index];
