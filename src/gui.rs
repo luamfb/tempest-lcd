@@ -118,6 +118,7 @@ impl Gui {
             thread::sleep(SLEEP_INTERVAL);
             time_playing_cur_note += iteration_start.elapsed();
         }
+        self.running = false;
     }
 
     fn play_note(&mut self, new_note: &Note) {
