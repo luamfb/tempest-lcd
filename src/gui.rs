@@ -13,7 +13,7 @@ use sdl2::{
     EventPump,
     Sdl,
     VideoSubsystem,
-    event::Event,
+    event::{Event, WindowEvent},
     keyboard::Keycode,
     pixels::Color,
     rect::Point,
@@ -93,6 +93,7 @@ impl Gui {
         self.play_note(&notes[0]);
         'main_loop: loop {
             iteration_start = Instant::now();
+            let cur_note = &notes[cur_index];
             self.handle_events();
             if !self.running {
                 break 'main_loop;
@@ -102,11 +103,10 @@ impl Gui {
                 previously_paused = true;
                 continue;
             } else if previously_paused {
-                self.play_note(&notes[cur_index]);
+                self.play_note(cur_note);
                 previously_paused = false;
             }
 
-            let cur_note = &notes[cur_index];
             if time_playing_cur_note > cur_note.duration {
                 time_playing_cur_note = Duration::ZERO;
                 cur_index += 1;
@@ -159,6 +159,19 @@ impl Gui {
         for ev in self.event_pump.poll_iter() {
             match ev {
                 Event::Quit {..} => self.running = false,
+                Event::Window { win_event, .. } => match win_event {
+                    WindowEvent::Close => self.running = false,
+                    WindowEvent::FocusLost => {
+                        clear_and_present(&mut self.canvas, Color::BLACK);
+                        self.paused = true;
+                    },
+                    WindowEvent::Shown
+                        | WindowEvent::Exposed
+                        | WindowEvent::FocusGained => {
+                            clear_and_present(&mut self.canvas, Color::BLACK);
+                    },
+                    _ => {},
+                },
                 Event::KeyDown { keycode: Some(key), .. } => match key {
                     Keycode::Q => self.running = false,
                     Keycode::P | Keycode::Space => {
