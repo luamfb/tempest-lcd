@@ -57,14 +57,16 @@ impl Gui {
         let res_y: i32 = res_y_uint.try_into()
             .unwrap_or_else(|e| panic!("failed to convert Y resolution {} to i32: {}", res_y_uint, e));
 
-        let canvas = window.into_canvas()
+        let mut canvas = window.into_canvas()
             .build()
             .unwrap_or_else(|e| panic!("failed to make renderer from window: {}", e));
 
         let event_pump = sdl_context.event_pump()
             .unwrap_or_else(|e| panic!("failed to get event pump: {}", e));
 
-        let mut gui = Gui {
+        clear_and_present(&mut canvas, Color::GRAY);
+
+        Gui {
             _sdl_context: sdl_context,
             _video_subsys: video_subsys,
             canvas,
@@ -74,9 +76,7 @@ impl Gui {
             res_y,
             paused: false,
             running: false,
-        };
-        gui.clear_and_present(Color::GRAY);
-        gui
+        }
     }
 
     pub fn run(&mut self, notes: &Vec<Note>) {
@@ -84,6 +84,7 @@ impl Gui {
         let mut cur_index = 0;
         let mut time_playing_cur_note = Duration::ZERO;
         let mut iteration_start;
+        let mut previously_paused = false;
 
         if notes.len() == 0 {
             return;
@@ -95,6 +96,15 @@ impl Gui {
             if !self.running {
                 break 'main_loop;
             }
+            if self.paused {
+                thread::sleep(SLEEP_INTERVAL);
+                previously_paused = true;
+                continue;
+            } else if previously_paused {
+                self.play_note(&notes[cur_index]);
+                previously_paused = false;
+            }
+
             let cur_note = &notes[cur_index];
             if time_playing_cur_note > cur_note.duration {
                 time_playing_cur_note = Duration::ZERO;
@@ -113,7 +123,7 @@ impl Gui {
     fn play_note(&mut self, new_note: &Note) {
         match new_note.freq {
             Some(freq) => self.draw_square_wave(freq), // note
-            None => self.clear_and_present(Color::BLACK), // rest
+            None => clear_and_present(&mut self.canvas, Color::BLACK), // rest
         };
     }
 
@@ -149,6 +159,16 @@ impl Gui {
                 Event::Quit {..} => self.running = false,
                 Event::KeyDown { keycode: Some(key), .. } => match key {
                     Keycode::Q => self.running = false,
+                    Keycode::P | Keycode::Space => {
+                        if !self.paused {
+                            clear_and_present(&mut self.canvas, Color::BLACK);
+                            self.paused = true;
+                        } else {
+                            self.paused = false;
+                            // since we don't have access to current note,
+                            // let the main loop re-render it.
+                        }
+                    },
                     _ => {},
                 },
                 _ => {},
@@ -156,10 +176,10 @@ impl Gui {
         }
     }
 
-    fn clear_and_present(&mut self, clear_color: Color) {
-        self.canvas.set_draw_color(clear_color);
-        self.canvas.clear();
-        self.canvas.present();
-    }
+}
 
+fn clear_and_present(canvas: &mut WindowCanvas, clear_color: Color) {
+    canvas.set_draw_color(clear_color);
+    canvas.clear();
+    canvas.present();
 }
