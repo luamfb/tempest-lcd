@@ -135,14 +135,6 @@ impl Gui {
         };
     }
 
-    pub fn is_running(&self) -> bool {
-        self.running
-    }
-
-    pub fn is_paused(&self) -> bool {
-        self.paused
-    }
-
     fn draw_square_wave(&mut self, note_freq: f64) {
         self.canvas.set_draw_color(Color::BLACK);
         self.canvas.clear();
