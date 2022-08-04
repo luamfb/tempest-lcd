@@ -10,6 +10,7 @@ use std::env;
 pub struct ArgData {
     pub horiz_refresh_rate: f64,
     pub filename: String,
+    pub wave_is_cosine: bool,
 }
 
 pub fn parse_args() -> ArgData {
@@ -32,12 +33,17 @@ pub fn parse_args() -> ArgData {
         },
         Some(arg2) => arg2,
     };
+    let wave_is_cosine = match args.next() {
+        Some(s) => &s == "cosine",
+        _ => false,
+    };
     ArgData {
         horiz_refresh_rate,
         filename,
+        wave_is_cosine,
     }
 }
 
 fn usage() {
-    println!("usage: <program> <horizontal_refresh_rate_in_KHz> <filename>");
+    println!("usage: <program> <horizontal_refresh_rate_in_KHz> <filename> [cosine]");
 }

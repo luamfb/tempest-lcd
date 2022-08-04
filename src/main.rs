@@ -19,6 +19,7 @@ fn main() {
         .unwrap_or_else(|e| panic!("failed to read file {}: {}", filename, e));
 
     let notes = parser::parse_file_contents(&file_contents);
-    let mut gui = Gui::create(arg_data.horiz_refresh_rate);
+    let mut gui = Gui::create(arg_data.horiz_refresh_rate,
+                              arg_data.wave_is_cosine);
     gui.run(&notes);
 }

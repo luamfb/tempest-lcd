@@ -6,9 +6,12 @@
 // See COPYING.txt.
 
 use std::{
+    f64::consts,
     time::{Duration, Instant},
     thread,
 };
+use rand::Rng;
+use rand_distr::StandardNormal;
 use sdl2::{
     EventPump,
     Sdl,
@@ -35,10 +38,11 @@ pub struct Gui {
     res_y: i32,
     running: bool,
     paused: bool,
+    wave_is_cosine: bool,
 }
 
 impl Gui {
-    pub fn create(horiz_refresh_rate: f64) -> Self {
+    pub fn create(horiz_refresh_rate: f64, wave_is_cosine: bool) -> Self {
         let sdl_context = sdl2::init()
             .unwrap_or_else(|e| panic!("failed to initialize SDL2: {}", e));
         let video_subsys = sdl_context.video()
@@ -76,6 +80,7 @@ impl Gui {
             res_y,
             paused: false,
             running: false,
+            wave_is_cosine,
         }
     }
 
@@ -130,7 +135,14 @@ impl Gui {
 
     fn play_note(&mut self, new_note: &Note) {
         match new_note.freq {
-            Some(freq) => self.draw_square_wave(freq), // note
+            // note
+            Some(freq) => {
+                if self.wave_is_cosine {
+                    self.draw_cosine_wave(freq);
+                } else {
+                    self.draw_square_wave(freq);
+                }
+            },
             None => clear_and_present(&mut self.canvas, Color::BLACK), // rest
         };
     }
@@ -149,6 +161,28 @@ impl Gui {
                 self.canvas.draw_line(origin, dest)
                     .unwrap_or_else(|e| panic!("failed to draw line: {}", e));
             }
+        }
+        self.canvas.present();
+    }
+
+    fn draw_cosine_wave(&mut self, note_freq: f64) {
+        self.canvas.set_draw_color(Color::BLACK);
+        self.canvas.clear();
+        for y in 0..self.res_y {
+            // approx time when arriving at this row
+            let t = (y as f64) / self.horiz_refresh_rate;
+            let dither: f64 = rand::thread_rng().sample(StandardNormal);
+            // note: TAU = 2 * PI
+            let raw_ampl = (consts::TAU * t * note_freq).cos();
+            let color_component = (127.5 * (1.0 + raw_ampl) + dither) as u8;
+            let color = Color::RGB(color_component,
+                                   color_component,
+                                   color_component);
+            self.canvas.set_draw_color(color);
+            let origin = Point::new(0, y);
+            let dest = Point::new(self.res_x, y);
+            self.canvas.draw_line(origin, dest)
+                .unwrap_or_else(|e| panic!("failed to draw line: {}", e));
         }
         self.canvas.present();
     }
