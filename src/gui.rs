@@ -155,7 +155,23 @@ impl Gui {
         for y in 0..self.res_y {
             // approx time when arriving at this row
             let t = (y as f64) / self.horiz_refresh_rate;
-            if ((2.0 * t * note_freq) as i64) % 2 == 0 {
+            // Note that `cosine_is_positive` is true if and only if
+            //      cos(2pi*t*note_freq) > 0
+            //
+            // PROOF: let's abbreviate note_freq to f.
+            // Since t > 0 and f > 0, the cast to i64 works as floor(), thus
+            //      cosine_is_positive <==> floor(2tf) mod 2 == 0
+            //      <==> floor(2tf) == 2n for some integer n
+            //      <==> 2n <= 2tf < 2n + 1
+            //      <==> 2pi*n <= 2pi*tf < 2pi*n + pi
+            // In this interval, for any integer n, `cos` is monotonically
+            // decreasing, and so
+            //      cosine_is_positive
+            //      <==> cos(2pi*n + pi) < cos(2pi*tf) <= cos(2pi*n)
+            //      <==> 0 < cos(2pi*tf) <= 1                           QED
+            //
+            let cosine_is_positive = ((2.0 * t * note_freq) as i64) % 2 == 0;
+            if cosine_is_positive {
                 let origin = Point::new(0, y);
                 let dest = Point::new(self.res_x, y);
                 self.canvas.draw_line(origin, dest)
