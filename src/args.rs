@@ -23,7 +23,7 @@ pub fn parse_args() -> ArgData {
         Some(arg1) => {
             let freq = arg1.parse::<f64>()
                 .unwrap_or_else(|e| panic!("1st argument is not a valid f64: {}", e));
-            freq * 1000.0 // because freq is in KHz
+            freq
         },
     };
     let filename = match args.next() {
@@ -45,5 +45,5 @@ pub fn parse_args() -> ArgData {
 }
 
 fn usage() {
-    println!("usage: <program> <horizontal_refresh_rate_in_KHz> <filename> [cosine]");
+    println!("usage: <program> <horizontal_refresh_rate (Hz)> <filename> [cosine]");
 }
