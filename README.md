@@ -60,6 +60,25 @@ You may optionally pass the string `cosine` as a third command line argument
 (after FILENAME), which causes the program to use sinusoidal waves instead of
 square waves. (More on this later.)
 
+## Who on Earth had this idea? (Or: a brief history of this project)
+
+It all started with [this paper][7], where the authors describe a way to make
+(CRT) monitors broadcast an AM signal.
+
+From it, a GPL2 project named [Tempest AM][8] was implemented, closely following
+the ideas presented on the paper, and using an X11 graphics library named G2,
+that I've frankly never heard of. (Maybe it was popular back then?)
+
+Then, another developer proceeded to greatly simplify the signal drawing
+function, using SDL (version 1) as the graphics library.
+That project was [Tempest for Eliza][1], which was previously mentioned
+as the predecessor to this project.
+
+Finally, my role on this was to change Tempest for Eliza so it could work on
+LCD monitors instead of CRT ones. Meanwhile, I've also rewritten the code from
+scratch (it wasn't a large codebase, and still isn't) to use SDL2, and to have,
+hopefully, a clearer input file format.
+
 ## Input files
 
 What this program needs as input is essentially a list of notes and rests,
@@ -124,3 +143,5 @@ the only way around this is placing a small rest between the notes.
 [4]: https://en.wikipedia.org/wiki/Note_value
 [5]: https://en.wikipedia.org/wiki/A440_(pitch_standard)
 [6]: https://en.wikipedia.org/wiki/12_equal_temperament
+[7]: https://www.cl.cam.ac.uk/~mgk25/ih98-tempest.pdf
+[8]: https://github.com/priikone/tempest-AM
