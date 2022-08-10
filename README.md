@@ -54,9 +54,11 @@ and `HORIZONTAL_REFRESH_RATE` is the value explained above.
 
 On the first run, this command will download all dependencies needed to run this
 program. Note, however, that you will also need [SDL2][3] installed.
-Consult your Linux distro's documentation for how to properly install it,
-but chances are your package manager has it under the name `libsdl2`
-or something of that sort.
+Consult your Linux distro's documentation for how to properly install it.
+
+Then, ensure your radio is on AM mode, and slowly change the frequency it's
+tuned to until you hear the sound. You might have to run the command a few times
+until finding the right frequency.
 
 You may optionally pass the string `cosine` as a third command line argument
 (after FILENAME), which causes the program to use sinusoidal waves instead of
