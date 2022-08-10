@@ -60,7 +60,7 @@ or something of that sort.
 
 You may optionally pass the string `cosine` as a third command line argument
 (after FILENAME), which causes the program to use sinusoidal waves instead of
-square waves. (More on this later.)
+square waves. [See how-it-works.md](how-it-works.md).
 
 ## Who on Earth had this idea? (Or: a brief history of this project)
 
@@ -80,6 +80,10 @@ Finally, my role on this was to change Tempest for Eliza so it could work on
 LCD monitors instead of CRT ones. Meanwhile, I've also rewritten the code from
 scratch (it wasn't a large codebase, and still isn't) to use SDL2, and to have,
 hopefully, a clearer input file format.
+
+## How does that even work??
+
+The explanation is rather long: [see how-it-works.md](how-it-works.md)
 
 ## Input files
 
