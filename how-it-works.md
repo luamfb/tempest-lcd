@@ -74,4 +74,4 @@ $$(A + m(t)) \sin(2\pi Ft)$$
 
 Which means the amplitude of the signal is changed from $A$ to $A + m(t)$.
 Note that amplitude modulation only occurs properly if $-A < m(t) < A$ for
-all $t$.
+all $t$; otherwise, a condition named overmodulation occurs.
