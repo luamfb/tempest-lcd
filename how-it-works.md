@@ -59,3 +59,19 @@ this process involves making some property of the carrier change according to
 the values of the signal at any given time.
 As it turns out, there are multiple ways to do that, but the
 most commonly used are Amplitude Modulation (AM) and Frequency Modulation (FM).
+
+#### Amplitude Modulation
+
+Since this project uses AM, let's take a closer look at it.
+If the message is $m(t)$ and the carrier $c(t)$ is a sinusoidal wave
+of amplitude $A > 0$ and frequency $F$, that is
+
+$$c(t) = A \sin(2\pi Ft)$$
+
+Then, the modulated signal is given by
+
+$$(A + m(t)) \sin(2\pi Ft)$$
+
+Which means the amplitude of the signal is changed from $A$ to $A + m(t)$.
+Note that amplitude modulation only occurs properly if $-A < m(t) < A$ for
+all $t$.
