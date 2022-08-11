@@ -1,6 +1,6 @@
-## That's cool and all, but how does that even work??
+# That's cool and all, but how does that even work??
 
-### The overview
+## The overview
 
 There are two hardware components behind this phenomenon: an LCD monitor,
 and a radio.
@@ -27,7 +27,7 @@ questions:
 
 We'll answer that in the following sections.
 
-### Part 1: waves, radios, and modulation
+## Part 1: waves, radios, and modulation
 
 In the end of the day, a radio is meant to turn electromagnetic waves into
 sound. But how does it do that? Does a radio simply maintain everything about
@@ -60,7 +60,7 @@ the values of the signal at any given time.
 As it turns out, there are multiple ways to do that, but the
 most commonly used are Amplitude Modulation (AM) and Frequency Modulation (FM).
 
-#### Amplitude Modulation
+### Amplitude Modulation
 
 Since this project uses AM, let's take a closer look at it.
 If the message is $m(t)$ and the carrier $c(t)$ is a sinusoidal wave
