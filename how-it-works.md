@@ -73,5 +73,28 @@ Then, the modulated signal is given by
 $$(A + m(t)) \sin(2\pi Ft)$$
 
 Which means the amplitude of the signal is changed from $A$ to $A + m(t)$.
-Note that amplitude modulation only occurs properly if $-A < m(t) < A$ for
-all $t$; otherwise, a condition named overmodulation occurs.
+Note that amplitude modulation only occurs properly if $-A \leq m(t) \leq A$
+for all $t$; otherwise, a condition named overmodulation occurs, and the message
+cannot be retrieved correctly.
+
+Let's look at the special case where our message is a square wave of frequency
+$f$ and the same amplitude as the carrier:
+
+$$m(t) = \begin{cases}
+    A & \text{if } \sin(2\pi ft) \geq 0 \\
+    -A & \text{otherwise}
+\end{cases}$$
+
+This means the modulated signal will be
+
+$$\begin{cases}
+    2A \sin(2\pi Ft) & \text{if } \sin(2\pi ft) \geq 0 \\
+    0 & \text{otherwise}
+\end{cases}$$
+
+Which means the modulated signal will alternate every $1/f$ seconds between
+a simple sine wave and no signal at all. This is close to the actual signal
+we're making the monitor send with this program -- which leads us to the second
+part of this equation.
+
+## Part 2: the LCD Monitor
