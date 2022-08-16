@@ -85,9 +85,9 @@ $$m(t) = \begin{cases}
     -A & \text{otherwise}
 \end{cases}$$
 
-This means the modulated signal will be
+This means the modulated signal, which we'll call $s(t)$, will be
 
-$$\begin{cases}
+$$s(t) = \begin{cases}
     2A \sin(2\pi Ft) & \text{if } \sin(2\pi ft) \geq 0 \\
     0 & \text{otherwise}
 \end{cases}$$
@@ -98,3 +98,91 @@ we're making the monitor send with this program -- which leads us to the second
 part of this equation.
 
 ## Part 2: the LCD Monitor
+
+Now, let's take a look at the LCD monitor's role in this phenomenon.
+
+First and foremost, as [this page][2] will tell you, LCD monitors have a
+**grid** or matrix, which directly map to pixels when the monitor is being used
+in its preferred (aka native) resolution.
+From now on, we'll assume the resolution in use is always the native one.
+
+[This page][3] has an interesting overview of how LCD works, though you don't
+have to read it: I'm only using it as a source for the following
+(mostly unsurprising) claims:
+
+- While reflective LCD screens do exist, most (if not all) computer monitors
+  have a built-in source of electromagnetic radiation.
+
+- Regardless of whether the LCD matrix is passive or active, white pixels emit
+  the most intense electromagnetic waves, and black pixels, the least intense,
+  with grayscale having proportionate intermediate intensity.
+  However, due to light components being implemented as sub-pixels, their
+  contribution to signal strength is not so straightforward.
+
+In addition to this, one of the authors of the paper that originated the
+Tempest AM project [also wrote a paper][4] on electromagnetic waves leaked by
+LCD monitors.
+The paper actually explains how to reconstruct text rendered by such monitors
+(and, to that end, quite sophisticated hardware is used). However, we can still
+learn a few things about LCD monitors from it:
+
+- "these technologies [LCD] update all pixels in a row simultaneously. This
+  makes it impractical to separate the contribution of individual pixels in a
+  row to the overall light emitted." (page 2)
+
+- "[LCD monitors] still have to continuously refresh the entire image content
+  [...] This continuous refresh ensures that the signals on the video interface
+  are periodic" (page 3)
+
+Armed with all this information, we can finally figure out what image we want
+to give our monitor:
+
+- Sub-pixels are complicated: stick to grayscale.
+
+- Changing colors mid-row is probably a waste of time, as it will do nothing
+  but change the average intensity of that row, which we could do by picking
+  a different grayscale color for the entire row anyway.
+
+As such, our image should be made of rows of the same grayscale color.
+
+In the specific case of wanting to send a square wave as a message, which means
+we'll want our monitor to send a signal like the $s(t)$ presented in the
+previous section, we want to alternate between maximum and minimum signal
+emission -- meaning the image we want should switch between white and black
+pixel rows.
+
+Also, recall that $s(t)$ switches between maximum and minimum levels with
+the same frequency $f$ of the message. To find the image we desire to render,
+we make the following assumptions:
+
+- Rows are rendered top-to-bottom.
+
+- The time taken to render any row is roughly the same. I don't see why any
+  row would be different from any other in how much time it takes to render it.
+
+- If the monitor renders $N$ frames per second and each frame is $h$ pixels
+  high, the monitor renders $N h$ rows per second.
+  I'm honestly not quite sure of this, since I expected the finished frame to be
+  "held" for a bit longer, but this assumption does seem to work in practice.
+
+The product $N h$ is the **horizontal refresh rate** passed as an argument to
+the program. Let's call $y$ the Y-coordinate of the current pixel row,
+measured in pixels and from the **top** of the screen
+(which, conveniently, is precisely what SDL2 does in its coordinate system).
+Then, by dividing $y$ by the horizontal refresh rate, we obtain
+an estimate of the time $t$ at which we arrived at this row since the frame
+started being rendered. Thus, we can finally calculate $\sin(2\pi ft)$ and check
+whether it is positive or not, to decide if we should paint the row white or
+black. (The actual code doesn't calculate any sine or cosine for this -- but you
+may as well read the function `draw_square_wave` and see by yourself!)
+
+### But what about the frequency of the carrier?
+
+You might remember that in previous section, while calculating $s(t)$, we
+assumed our carrier was a sine wave. Is this the case here? I have no idea what
+sort of radio wave the monitor is emitting, but it certainly isn't a
+well-behaved sine wave. However, as it turns out, that doesn't really matter.
+
+[2]: https://computer.howstuffworks.com/monitor6.htm
+[3]: https://electronics.howstuffworks.com/lcd.htm
+[4]: https://www.cl.cam.ac.uk/~mgk25/pet2004-fpd.pdf
