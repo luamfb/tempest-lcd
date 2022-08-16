@@ -176,13 +176,55 @@ whether it is positive or not, to decide if we should paint the row white or
 black. (The actual code doesn't calculate any sine or cosine for this -- but you
 may as well read the function `draw_square_wave` and see by yourself!)
 
-### But what about the frequency of the carrier?
+## Part 3: the carrier, and how we got away knowing almost nothing about it
 
-You might remember that in previous section, while calculating $s(t)$, we
+You might remember that in part 1, while calculating $s(t)$, we
 assumed our carrier was a sine wave. Is this the case here? I have no idea what
 sort of radio wave the monitor is emitting, but it certainly isn't a
 well-behaved sine wave. However, as it turns out, that doesn't really matter.
+We know that whatever this wave looks like, it must be periodic.
+Also, a good fellow named Fourier (which is one of those prodigious
+mathematicians whose names seem to pop up pretty much everywhere, like Euler,
+Laplace and Gauss), found out that almost any periodic function can be written
+as a (possibly infinite) sum of sines and cosines, which has been naturally
+named [Fourier series][5] after him. That is, for almost any periodic function
+$f$,
+
+$$
+f(t) = \frac{a_0}{2} + \sum_{n=1}^{\infty} a_n \cos(n t) +
+\sum_{n=1}^{\infty} b_n \sin(n t)
+$$
+
+For some set of coefficients $\{a_n\}$ and $\{b_n\}$.
+Each of these sines and cosines is called a **component** of the signal $f$.
+
+When a radio is tuned to a certain frequency $F$, it effectively "filters out"
+or "ignores" any component of the original signal that is not inside a narrow
+range centered on $F$. As such, we can completely ignore how the carrier looks
+like, and simply look at its components, which are always sinusoidal waves,
+and therefore our assumption of having a sinusoidal carrier pretty much always
+works.
+(Note that sinusoidal waves can be either sines or cosines:
+since $\cos(x) = \sin(x + \pi/2)$ for any $x$, the only difference between
+those waves is their phase, but phases are irrelevant in this context.)
+
+Now, you might remember that, in order to hear the sound produced here,
+one has to slowly change the frequency the radio is tuned to. The reason for
+that is we don't really know the values of the coefficients $a_n$ and $b_n$
+of each component; more importantly, we do not know the frequency of the
+components that have a high enough coefficient that allows the radio to produce
+audible sound.
+Of course, we could try to obtain the raw signal using a special antenna,
+and proceed to make a Fourier analysis to find out the component with the
+maximum coefficient whose frequency is also in the range of our radio...
+Or, we could just change the frequency until we hear the sound.
+
+However, that begs the question: "what if the signal coming from my monitor
+doesn't have **any** component strong enough to produce sound in the frequency
+range that my radio can tune to?" Unfortunately, yes, that may happen. The only
+solution then is to either use a different radio, or use a different monitor.
 
 [2]: https://computer.howstuffworks.com/monitor6.htm
 [3]: https://electronics.howstuffworks.com/lcd.htm
 [4]: https://www.cl.cam.ac.uk/~mgk25/pet2004-fpd.pdf
+[5]: https://mathworld.wolfram.com/FourierSeries.html
