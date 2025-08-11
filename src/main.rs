@@ -7,7 +7,7 @@
 
 mod args;
 mod gui;
-mod parser;
+mod legacy_parser;
 
 use std::fs;
 use clap::Parser;
@@ -21,8 +21,12 @@ fn main() {
     let file_contents = fs::read_to_string(filename)
         .unwrap_or_else(|e| panic!("failed to read file {}: {}", filename, e));
 
-    let notes = parser::parse_file_contents(&file_contents);
     let mut gui = Gui::create(arg_data.horiz_refresh_rate,
                               arg_data.cosine);
-    gui.run(&notes);
+    if arg_data.midi {
+        panic!("not implemented"); //TODO
+    } else {
+        let notes = legacy_parser::parse_file_contents(&file_contents);
+        gui.run(&notes);
+    }
 }

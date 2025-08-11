@@ -22,7 +22,7 @@ use sdl2::{
     rect::Point,
     render::WindowCanvas,
 };
-use crate::parser::Note;
+use crate::legacy_parser::Note;
 
 const SLEEP_INTERVAL: Duration = Duration::from_millis(5);
 

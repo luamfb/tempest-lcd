@@ -11,4 +11,6 @@ pub struct Args {
     pub filename: String,
     #[arg(long)]
     pub cosine: bool,
+    #[arg(long)]
+    pub midi: bool,
 }
