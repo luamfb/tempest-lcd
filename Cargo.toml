@@ -8,3 +8,4 @@ sdl2 = "0.35"
 rand = "0.8"
 rand_distr = "0.4"
 clap = { version = "4.5", features = ["derive"] }
+midly = "0.5"
