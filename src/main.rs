@@ -10,16 +10,19 @@ mod gui;
 mod parser;
 
 use std::fs;
+use clap::Parser;
+
 use gui::Gui;
+use args::Args;
 
 fn main() {
-    let arg_data = args::parse_args();
+    let arg_data = Args::parse();
     let filename = &arg_data.filename;
     let file_contents = fs::read_to_string(filename)
         .unwrap_or_else(|e| panic!("failed to read file {}: {}", filename, e));
 
     let notes = parser::parse_file_contents(&file_contents);
     let mut gui = Gui::create(arg_data.horiz_refresh_rate,
-                              arg_data.wave_is_cosine);
+                              arg_data.cosine);
     gui.run(&notes);
 }
