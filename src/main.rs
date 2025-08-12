@@ -8,12 +8,14 @@
 mod args;
 mod gui;
 mod legacy_parser;
+mod legacy_player;
 
 use std::fs;
 use clap::Parser;
 
 use gui::Gui;
 use args::Args;
+use legacy_player::LegacyPlayer;
 
 fn main() {
     let arg_data = Args::parse();
@@ -21,12 +23,12 @@ fn main() {
     let file_contents = fs::read_to_string(filename)
         .unwrap_or_else(|e| panic!("failed to read file {}: {}", filename, e));
 
-    let mut gui = Gui::create(arg_data.horiz_refresh_rate,
-                              arg_data.cosine);
+    let gui = Gui::create(arg_data.horiz_refresh_rate);
     if arg_data.midi {
         panic!("not implemented"); //TODO
     } else {
+        let mut player = LegacyPlayer::create(gui, arg_data.cosine);
         let notes = legacy_parser::parse_file_contents(&file_contents);
-        gui.run(&notes);
+        player.run(&notes);
     }
 }

@@ -7,8 +7,6 @@
 
 use std::{
     f64::consts,
-    time::{Duration, Instant},
-    thread,
 };
 use rand::Rng;
 use rand_distr::StandardNormal;
@@ -22,9 +20,6 @@ use sdl2::{
     rect::Point,
     render::WindowCanvas,
 };
-use crate::legacy_parser::Note;
-
-const SLEEP_INTERVAL: Duration = Duration::from_millis(5);
 
 pub struct Gui {
     // note: these two are never used directly, but must be held here to ensure
@@ -36,13 +31,10 @@ pub struct Gui {
     horiz_refresh_rate: f64,
     res_x: i32,
     res_y: i32,
-    running: bool,
-    paused: bool,
-    wave_is_cosine: bool,
 }
 
 impl Gui {
-    pub fn create(horiz_refresh_rate: f64, wave_is_cosine: bool) -> Self {
+    pub fn create(horiz_refresh_rate: f64) -> Self {
         let sdl_context = sdl2::init()
             .unwrap_or_else(|e| panic!("failed to initialize SDL2: {}", e));
         let video_subsys = sdl_context.video()
@@ -78,76 +70,10 @@ impl Gui {
             horiz_refresh_rate,
             res_x,
             res_y,
-            paused: false,
-            running: false,
-            wave_is_cosine,
         }
     }
 
-    pub fn run(&mut self, notes: &Vec<Note>) {
-        if self.running || notes.len() == 0 {
-            return;
-        }
-
-        self.running = true;
-        let mut cur_index = 0;
-        let mut time_playing_cur_note = Duration::ZERO;
-        let mut iteration_start;
-        let mut previously_paused = false;
-
-        // Special care must be taken to ensure first note is actually played.
-        // We must handle events before playing it as well, because there's
-        // a good chance we'll receive some event (like Shown or FocusGained)
-        // that would cause the screen to go blank.
-        self.handle_events();
-        self.play_note(&notes[0]);
-
-        'main_loop: loop {
-            iteration_start = Instant::now();
-            let cur_note = &notes[cur_index];
-            self.handle_events();
-            if !self.running {
-                break 'main_loop;
-            }
-            if self.paused {
-                thread::sleep(SLEEP_INTERVAL);
-                previously_paused = true;
-                continue;
-            } else if previously_paused {
-                self.play_note(cur_note);
-                previously_paused = false;
-            }
-
-            if time_playing_cur_note > cur_note.duration {
-                time_playing_cur_note = Duration::ZERO;
-                cur_index += 1;
-                if cur_index >= notes.len() {
-                    break 'main_loop;
-                }
-                let new_note = &notes[cur_index];
-                self.play_note(new_note);
-            }
-            thread::sleep(SLEEP_INTERVAL);
-            time_playing_cur_note += iteration_start.elapsed();
-        }
-        self.running = false;
-    }
-
-    fn play_note(&mut self, new_note: &Note) {
-        match new_note.freq {
-            // note
-            Some(freq) => {
-                if self.wave_is_cosine {
-                    self.draw_cosine_wave(freq);
-                } else {
-                    self.draw_square_wave(freq);
-                }
-            },
-            None => clear_and_present(&mut self.canvas, Color::BLACK), // rest
-        };
-    }
-
-    fn draw_square_wave(&mut self, note_freq: f64) {
+    pub fn draw_single_square_wave(&mut self, note_freq: f64) {
         self.canvas.set_draw_color(Color::BLACK);
         self.canvas.clear();
 
@@ -181,7 +107,7 @@ impl Gui {
         self.canvas.present();
     }
 
-    fn draw_cosine_wave(&mut self, note_freq: f64) {
+    pub fn draw_single_cosine_wave(&mut self, note_freq: f64) {
         self.canvas.set_draw_color(Color::BLACK);
         self.canvas.clear();
         for y in 0..self.res_y {
@@ -203,15 +129,15 @@ impl Gui {
         self.canvas.present();
     }
 
-    fn handle_events(&mut self) {
+    pub fn handle_events(&mut self, running: &mut bool, paused: &mut bool) {
         for ev in self.event_pump.poll_iter() {
             match ev {
-                Event::Quit {..} => self.running = false,
+                Event::Quit {..} => *running = false,
                 Event::Window { win_event, .. } => match win_event {
-                    WindowEvent::Close => self.running = false,
+                    WindowEvent::Close => *running = false,
                     WindowEvent::FocusLost => {
                         clear_and_present(&mut self.canvas, Color::BLACK);
-                        self.paused = true;
+                        *paused = true;
                     },
                     WindowEvent::Shown
                         | WindowEvent::Exposed
@@ -221,15 +147,15 @@ impl Gui {
                     _ => {},
                 },
                 Event::KeyDown { keycode: Some(key), .. } => match key {
-                    Keycode::Q => self.running = false,
+                    Keycode::Q => *running = false,
                     Keycode::P | Keycode::Space => {
-                        if !self.paused {
+                        if !*paused {
                             clear_and_present(&mut self.canvas, Color::BLACK);
-                            self.paused = true;
+                            *paused = true;
                         } else {
-                            self.paused = false;
-                            // since we don't have access to current note,
-                            // let the main loop re-render it.
+                            *paused = false;
+                            // since we don't have access to the notes,
+                            // let the player re-render them.
                         }
                     },
                     _ => {},
@@ -239,6 +165,9 @@ impl Gui {
         }
     }
 
+    pub fn clear_and_present(&mut self, clear_color: Color) {
+        clear_and_present(&mut self.canvas, clear_color);
+    }
 }
 
 fn clear_and_present(canvas: &mut WindowCanvas, clear_color: Color) {
