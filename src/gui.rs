@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Luana Martins Barbosa
+// Copyright (C) 2022-2025 Luana Martins Barbosa
 //
 // This file is part of tempest-lcd.
 // tempest-lcd is free software, released under the
@@ -125,6 +125,36 @@ impl Gui {
             let dest = Point::new(self.res_x, y);
             self.canvas.draw_line(origin, dest)
                 .unwrap_or_else(|e| panic!("failed to draw line: {}", e));
+        }
+        self.canvas.present();
+    }
+
+    pub fn draw_square_waves(&mut self, freqs: &[f64]) {
+        self.canvas.set_draw_color(Color::BLACK);
+        self.canvas.clear();
+
+        for y in 0..self.res_y {
+            // approx time when arriving at this row
+            let t = (y as f64) / self.horiz_refresh_rate;
+            let mut level : i32 = 0;
+            for note_freq in freqs {
+                // Same logic as in `draw_single_square_wave`
+                let cosine_is_positive = ((2.0 * t * note_freq) as i64) % 2 == 0;
+                if cosine_is_positive {
+                    level += 1;
+                } else {
+                    level -= 1;
+                }
+            }
+            let level_norm = ((level as f64) + (freqs.len() as f64)) / (freqs.len() as f64);
+            let color_comp = (level_norm * 127.5) as u8;
+            let color = Color::RGB(color_comp, color_comp, color_comp);
+            self.canvas.set_draw_color(color);
+            let origin = Point::new(0, y);
+            let dest = Point::new(self.res_x, y);
+            self.canvas.draw_line(origin, dest)
+                .unwrap_or_else(|e| panic!("failed to draw line: {}", e));
+
         }
         self.canvas.present();
     }
