@@ -195,8 +195,11 @@ impl MidiPlayer {
         let notes : Vec<f64> = notes_midi.keys()
             .map(|num| midi_number_to_freq(*num))
             .collect();
-        // TODO take `wave_is_cosine` into account
-        self.gui.draw_square_waves(&notes);
+        if self.wave_is_cosine {
+            self.gui.draw_cosine_waves(&notes);
+        } else {
+            self.gui.draw_square_waves(&notes);
+        }
     }
 }
 

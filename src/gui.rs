@@ -159,6 +159,33 @@ impl Gui {
         self.canvas.present();
     }
 
+    pub fn draw_cosine_waves(&mut self, freqs: &[f64]) {
+        self.canvas.set_draw_color(Color::BLACK);
+        self.canvas.clear();
+        for y in 0..self.res_y {
+            // approx time when arriving at this row
+            let t = (y as f64) / self.horiz_refresh_rate;
+            let mut raw_ampl = 0.0;
+            let dither: f64 = rand::thread_rng().sample(StandardNormal);
+            for note_freq in freqs {
+                // note: TAU = 2 * PI
+                raw_ampl += (consts::TAU * t * note_freq).cos();
+            }
+            let ampl_norm = (raw_ampl + (freqs.len() as f64)) / (freqs.len() as f64);
+            let color_component = (127.5 * ampl_norm + dither) as u8;
+            let color = Color::RGB(color_component,
+                                   color_component,
+                                   color_component);
+            self.canvas.set_draw_color(color);
+            let origin = Point::new(0, y);
+            let dest = Point::new(self.res_x, y);
+            self.canvas.draw_line(origin, dest)
+                .unwrap_or_else(|e| panic!("failed to draw line: {}", e));
+        }
+        self.canvas.present();
+    }
+
+
     pub fn handle_events(&mut self, running: &mut bool, paused: &mut bool) {
         for ev in self.event_pump.poll_iter() {
             match ev {
