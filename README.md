@@ -51,6 +51,10 @@ cargo run -- HORIZONTAL_REFRESH_RATE FILENAME
 
 Where `FILENAME` is any file under the `inputs/` folder,
 and `HORIZONTAL_REFRESH_RATE` is the value explained above.
+Alternatively, you can use the experimental MIDI player
+by additionally passing the `--midi` option; then FILENAME
+must be the path to a MIDI file instead.
+You can find a few example MIDI files in the `midi_inputs/` folder.
 
 On the first run, this command will download all dependencies needed to run this
 program. Note, however, that you will also need [SDL2][3] installed.
@@ -60,9 +64,14 @@ Then, ensure your radio is on AM mode, and slowly change the frequency it's
 tuned to until you hear the sound. You might have to run the command a few times
 until finding the right frequency.
 
-You may optionally pass the string `cosine` as a third command line argument
-(after FILENAME), which causes the program to use sinusoidal waves instead of
+You may optionally pass the option `--cosine` as a command line argument,
+which causes the program to use sinusoidal waves instead of
 square waves. [See how-it-works.md](how-it-works.md).
+
+Note that, when using the MIDI player, the sound may not be as audible
+when a large number of notes are playing simultaneously.
+Additionally, if you get nothing but a blank screen, you probably need
+to change which channel is being played, by using the `-c` option.
 
 ## Who on Earth had this idea? (Or: a brief history of this project)
 
@@ -79,7 +88,8 @@ That project was [Tempest for Eliza][1], which was previously mentioned
 as the predecessor to this project.
 
 Finally, my role on this was to change Tempest for Eliza so it could work on
-LCD monitors instead of CRT ones. Meanwhile, I've also rewritten the code from
+LCD monitors instead of CRT ones, and add an experimental MIDI player.
+Meanwhile, I've also rewritten the code from
 scratch (it wasn't a large codebase, and still isn't) to use SDL2, and to have,
 hopefully, a clearer input file format.
 
@@ -91,13 +101,8 @@ The explanation is rather long: [see how-it-works.md](how-it-works.md)
 
 What this program needs as input is essentially a list of notes and rests,
 along with their respective durations.
-Therefore, ideally, this project would be able to take Standard MIDI files
-(SMF) as input, since that is probably the most widespread media format that
-conveys that sort of information.
-However, parsing MIDI files is by itself a fairly complex task; on top of that,
-MIDI files allow any number of notes to be playing simultaneously, which is not
-straightforward to implement with this setup.
-Therefore, in the end, we've had to settle for a custom text format conveying
+This project now has an experimental MIDI player, but we also have
+a custom text format conveying
 note information, like our predecessor, Tempest for Eliza, also used.
 (However, hopefully, this format is more readable than the one that project
 used...)
