@@ -29,7 +29,9 @@ fn main() {
     let gui = Gui::create(arg_data.horiz_refresh_rate);
 
     if arg_data.midi {
-        let mut player = MidiPlayer::create(gui, arg_data.cosine);
+        let mut player = MidiPlayer::create(gui,
+                                            arg_data.cosine,
+                                            arg_data.channel);
         let smf = Smf::parse(&file_contents)
             .unwrap_or_else(|e| panic!(
                         "failed to parse MIDI file '{}': '{}'",

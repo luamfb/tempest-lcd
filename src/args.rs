@@ -13,4 +13,6 @@ pub struct Args {
     pub cosine: bool,
     #[arg(long)]
     pub midi: bool,
+    #[arg(short, long, default_value_t = 0)]
+    pub channel: u8,
 }

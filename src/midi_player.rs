@@ -37,15 +37,17 @@ pub struct MidiPlayer {
     running: bool,
     paused: bool,
     wave_is_cosine: bool,
+    subscribed_channel: u8,
 }
 
 impl MidiPlayer {
-    pub fn create(gui: Gui, wave_is_cosine: bool) -> Self {
+    pub fn create(gui: Gui, wave_is_cosine: bool, subscribed_channel: u8) -> Self {
         MidiPlayer {
             gui,
             paused: false,
             running: false,
             wave_is_cosine,
+            subscribed_channel,
         }
     }
 
@@ -125,6 +127,7 @@ impl MidiPlayer {
                     tracks_ended = false;
                     if ev.delta <= ticks_elapsed {
                         self.handle_midi_event(ev.kind,
+                                               self.subscribed_channel,
                                                &mut notes_currently_on,
                                                &mut tick_duration,
                                                timing);
@@ -158,28 +161,29 @@ impl MidiPlayer {
 
     fn handle_midi_event<'a>(&mut self,
                              ev_kind: TrackEventKind<'a>,
+                             subscribed_channel: u8,
                              notes_currently_on: &mut HashMap<u7, u7>,
                              tick_duration: &mut Duration,
                              midi_timing: Timing) {
         match ev_kind {
-            TrackEventKind::Midi {
-                channel: _,
-                message: MidiMessage::NoteOn { key, vel }
-            } => {
-                if vel == 0 {
-                    // if velocity was set to zero, remove note instead
+            TrackEventKind::Midi { channel, message }
+            if channel == subscribed_channel => match message {
+                MidiMessage::NoteOn { key, vel } => {
+                    if vel == 0 {
+                        // if velocity was set to zero, remove note instead
+                        // FIXME fade-out note before removing
+                        notes_currently_on.remove(&key);
+                    } else if !notes_currently_on.contains_key(&key) {
+                        notes_currently_on.insert(key, vel);
+                        self.play_notes(notes_currently_on);
+                    }
+                },
+                MidiMessage::NoteOff { key, vel:_ } => {
+                    // FIXME fade-out note before removing
                     notes_currently_on.remove(&key);
-                } else if !notes_currently_on.contains_key(&key) {
-                    notes_currently_on.insert(key, vel);
                     self.play_notes(notes_currently_on);
-                }
-            },
-            TrackEventKind::Midi {
-                channel: _,
-                message: MidiMessage::NoteOff { key, vel:_ }
-            } => {
-                notes_currently_on.remove(&key);
-                self.play_notes(notes_currently_on);
+                },
+                _ => {},
             },
             TrackEventKind::Meta(MetaMessage::Tempo(microsec_per_quarter)) => {
                 *tick_duration = get_tick_duration(
