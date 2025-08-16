@@ -166,7 +166,10 @@ impl MidiPlayer {
                 channel: _,
                 message: MidiMessage::NoteOn { key, vel }
             } => {
-                if !notes_currently_on.contains_key(&key) {
+                if vel == 0 {
+                    // if velocity was set to zero, remove note instead
+                    notes_currently_on.remove(&key);
+                } else if !notes_currently_on.contains_key(&key) {
                     notes_currently_on.insert(key, vel);
                     self.play_notes(notes_currently_on);
                 }
